@@ -13,7 +13,7 @@ export interface IStudent {
   updatedAt?: Date
 }
 
-export interface IStudentInput extends Optional<IStudent, 'id' > {}
+export interface IStudentInput extends Optional<IStudent, 'id'> {}
 
 class Student extends Model<IStudent, IStudentInput> implements IStudent {
     public id!: number
@@ -61,5 +61,5 @@ class Student extends Model<IStudent, IStudentInput> implements IStudent {
     timestamps: true,
     sequelize: sequelizeConnection,
   })
-  
+
   export default Student
