@@ -1,11 +1,10 @@
 import express, { Application } from 'express'
+import routes from './api/router'
+import { port } from 'config'
 
-const port = 3000
 try {
     const app: Application = express()
-    app.get('/', function (req, res) {
-      res.send('Hello World')
-    })
+    app.use('/api/v1', routes)
     app.listen(port, () => {
         console.log(`App listening at http://localhost:${port}`)
       })
