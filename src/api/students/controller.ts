@@ -1,45 +1,44 @@
-import { IFilters } from "interfaces"
-import Student, { IStudent, IStudentInput } from "db/models/Student"
-import { Op } from 'sequelize'
+import { IStudentInput } from 'db/models/Student'
+import { Router, Request, Response } from 'express'
+import { getAll, create, update, deleteById, getById } from './repository'
+import { IFilters } from 'interfaces'
 
-export const getAll = async(filters: IFilters): Promise<IStudent[]> => {
-  return await Student.findAll({
-    where: {
-    ...(filters.name && { name: filters.name}),
-    ...(filters.surname && { surname: filters.surname}),
-    ...(filters.second_name && { second_name: filters.second_name}),
-    ...(filters.birth && { birth: filters.birth}),
-    ...(filters.perfomance && { birth: filters.perfomance}),
-    ...(filters.subject && { subjects: { [Op.contains]: [filters.subject] }}),
-  },
-    ...(filters.limit && { limit: filters.limit }),
-    ...(filters.offset && { offset: filters.offset * filters.limit }),
-  })
-}
+const studentsRouter = Router()
 
-export const getById = async(id: number): Promise<IStudent> => {
-  const foundStudent = await Student.findByPk(id)
-  if (!foundStudent) {
-    throw new Error('Student not found')
-  }
-  return foundStudent
-}
+studentsRouter.get('/', async (req: Request, res: Response) => {
+    const filters: IFilters = req.query || {}
+    const result = await getAll(filters)
 
-export const create = async(student: IStudentInput): Promise<IStudent> => {
-  return await Student.create(student)
-}
+    return res.status(200).send(result)
+})
 
-export const update = async(id: number, student: IStudentInput): Promise<IStudent> => {
-  const foundStudent = await Student.findByPk(id)
-  if (!foundStudent) {
-    throw new Error('Student not found')
-  }
-  return await foundStudent.update(student)
-}
+studentsRouter.get('/:id', async (req: Request, res: Response) => {
+    const id = Number(req.params.id)
+    const result = await getById(id)
 
-export const deleteById = async(id: number): Promise<boolean> => {
-  const deletedStudentCount = await Student.destroy({
-    where: { id }
-  })
-  return !!deletedStudentCount
-}
+    return res.status(200).send(result)
+})
+
+studentsRouter.put('/:id', async (req: Request, res: Response) => {
+    const { id } = req.params
+    const student: IStudentInput = req.body
+    const result = await update(Number(id), student)
+
+    return res.status(200).send(result)
+})
+
+studentsRouter.delete('/:id', async (req: Request, res: Response) => {
+    const { id } = req.params
+    const result = await deleteById(Number(id))
+
+    return res.status(204).send(result)
+})
+
+studentsRouter.post('/', async (req: Request, res: Response) => {
+    const student: IStudentInput = req.body
+    const result = await create(student)
+
+    return res.status(201).send(result)
+})
+
+export default studentsRouter
